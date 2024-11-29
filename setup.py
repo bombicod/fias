@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
+
 from setuptools import setup, find_packages
 import codecs
 import os
@@ -47,14 +47,12 @@ if sys.argv[-1] == 'test':
     os.system('py.test')
     sys.exit()
 
-
 if sys.argv[-1] == 'tag':
     check_tag_exists()
 
     os.system("git tag -a %s -m 'version %s'" % (__version__, __version__))
     os.system("git push --tags")
     sys.exit()
-
 
 if sys.argv[-1] == 'publish':
     check_tag_exists()
@@ -78,7 +76,6 @@ if sys.argv[-1] == 'publish':
     print(" python setup.py tag")
     sys.exit()
 
-
 setup(
     name='django-fias',
     version=__version__,
@@ -92,19 +89,16 @@ setup(
 
     license='MIT license',
     install_requires=[
-        'django>=2.0',
-        'django_select2>=7.0.3',
-        'zeep>=0.17.0',
-        'rarfile',
-        'six',
+        'django>=3.2',
+        'django_select2>=8.0.0',
+        'zeep>=4.3.1',
         'lxml',
-        'unrar',
-        'dbfread>=2.0.5',
-        'progress',
+        'dbfread>=2.0.7',
+        'tqdm',
     ],
     extras_require={
         'MySQL': [
-            'PyMySQL==0.9.3',
+            'PyMySQL>=1.1.1',
         ],
     },
     packages=find_packages(exclude=('tests', 'tests.*')),
@@ -116,11 +110,11 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Natural Language :: Russian',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
 )

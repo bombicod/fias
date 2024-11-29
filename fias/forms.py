@@ -1,6 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals, absolute_import
-
 from django.urls import reverse
 from django.forms import widgets
 from django.forms.models import ModelChoiceField
@@ -23,7 +20,8 @@ class AddressSelect2Widget(ModelSelect2Widget):
 
     def optgroups(self, name, value, attrs=None):
         values = value[0].split(',') if value[0] else []
-        values_dict = [{'id': obj.aoguid, 'value': obj.full_name(5, True)} for obj in self.queryset.filter(pk__in=values)]
+        values_dict = [{'id': obj.aoguid, 'value': obj.full_name(5, True)} for obj in
+                       self.queryset.filter(pk__in=values)]
         selected = {*values}
         subgroup = [self.create_option(name, v['id'], v['value'], selected, i) for i, v in enumerate(values_dict)]
         return [(None, subgroup, 0)]
@@ -41,7 +39,6 @@ class AddressSelect2Field(ModelChoiceField):
 class AreaChainedSelect(widgets.Select):
 
     def __init__(self, app_name, model_name, address_field, *args, **kwargs):
-
         self.app_name = app_name
         self.model_name = model_name
         self.address_field = address_field
@@ -49,7 +46,6 @@ class AreaChainedSelect(widgets.Select):
         super(AreaChainedSelect, self).__init__(*args, **kwargs)
 
     def render(self, name, value, attrs=None, renderer=None):
-
         url = reverse(SUGGEST_AREA_VIEW)
         js = """
         <script type="text/javascript">
@@ -75,7 +71,7 @@ class AreaChainedSelect(widgets.Select):
             'address_field': self.address_field,
             'url': url,
             'id': attrs['id'],
-            }
+        }
 
         output = super(AreaChainedSelect, self).render(name, value, attrs, renderer)
         output += js
@@ -85,7 +81,6 @@ class AreaChainedSelect(widgets.Select):
 class ChainedAreaField(ModelChoiceField):
 
     def __init__(self, app_name, model_name, address_field, *args, **kwargs):
-
         defaults = {
             'widget': AreaChainedSelect(app_name, model_name, address_field)
         }

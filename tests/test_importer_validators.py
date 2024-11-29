@@ -1,11 +1,8 @@
-# coding: utf-8
-from __future__ import unicode_literals, absolute_import
-
 import datetime
 import uuid
 from django.test import TestCase
 
-from fias.importer.validators import (
+from fias._importer.validators import (
     socr_base_validator,
     common_validator,
     addrobj_validator,
@@ -16,6 +13,7 @@ today = datetime.date.today()
 diff = datetime.timedelta(1)
 yesterday = today - diff
 tomorrow = today + diff
+
 
 class TestSocrBaseValidator(TestCase):
 

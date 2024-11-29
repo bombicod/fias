@@ -80,7 +80,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -90,7 +90,7 @@ SECRET_KEY = '(*jt_e3pgio9!3(@#)^*w0q5^0)63g@ti6a=m6y^f9n1v1@+u^'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    #     'django.template.loaders.eggs.Loader',
 )
 
 TEMPLATES = [
@@ -142,14 +142,13 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
-     'django.contrib.admin',
+    'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
     'fias',
     'django_select2',
     'tst',
 )
-
 
 FIAS_TABLES = [
     'normdoc',
@@ -195,22 +194,22 @@ LOGGING = {
             'filename': 'logs/test_project.log'
         },
 
-        #'mail_admins': {
+        # 'mail_admins': {
         #    'level': 'ERROR',
         #    'class': 'django.utils.log.AdminEmailHandler'
-        #}
+        # }
     },
     'loggers': {
         'django': {
             'handlers': ['logfile'],
             'level': 'DEBUG',
-            #'propagate': False,
+            # 'propagate': False,
         },
 
-        #'django.request': {
+        # 'django.request': {
         #    'handlers': ['mail_admins'],
         #    'level': 'ERROR',
         #    'propagate': True,
-        #},
+        # },
     }
 }

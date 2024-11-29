@@ -6,7 +6,6 @@ import fias.fields.address
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -19,8 +18,12 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('title', models.CharField(max_length=100, verbose_name='title')),
-                ('area', fias.fields.address.ChainedAreaField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='+', to='fias.AddrObj')),
-                ('location', fias.fields.address.AddressField(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='fias.AddrObj')),
+                ('area', fias.fields.address.ChainedAreaField(blank=True, null=True,
+                                                              on_delete=django.db.models.deletion.CASCADE,
+                                                              related_name='+', to='fias.AddrObj')),
+                ('location',
+                 fias.fields.address.AddressField(on_delete=django.db.models.deletion.CASCADE, related_name='+',
+                                                  to='fias.AddrObj')),
             ],
         ),
         migrations.CreateModel(
@@ -28,7 +31,9 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('title', models.CharField(max_length=100, verbose_name='title')),
-                ('location', fias.fields.address.AddressField(on_delete=django.db.models.deletion.CASCADE, related_name='+', to='fias.AddrObj')),
+                ('location',
+                 fias.fields.address.AddressField(on_delete=django.db.models.deletion.CASCADE, related_name='+',
+                                                  to='fias.AddrObj')),
             ],
         ),
     ]

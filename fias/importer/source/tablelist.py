@@ -1,10 +1,12 @@
-# coding: utf-8
-from __future__ import unicode_literals, absolute_import
+from datetime import datetime
 
 from fias.models import Version
 
 from fias.importer.signals import pre_load, post_load
 from fias.importer.table import TableFactory
+from fias.importer.table.table import Table
+
+from typing import Dict, List, Optional, Type
 
 from .wrapper import SourceWrapper
 
@@ -14,15 +16,18 @@ class TableListLoadingError(Exception):
 
 
 class TableList(object):
-    wrapper_class = SourceWrapper
-    wrapper = None
+    wrapper_class: Type[SourceWrapper]
+    wrapper: SourceWrapper = None
 
-    table_list = None
-    date = None
-    version_info = None
+    table_list: Dict[str, List[Table]] = None
+    date: datetime = None
+    version_info: Version = None
 
-    def __init__(self, src, version=None, tempdir=None):
-        self.info_version = version
+    src: str
+    tempdir: Optional[str]
+
+    def __init__(self, src, version: Version = None, tempdir=None):
+        self.version_info = version
         self.src = src
         self.tempdir = tempdir
 
@@ -42,7 +47,7 @@ class TableList(object):
         return self.wrapper.get_file_list()
 
     @property
-    def tables(self):
+    def tables(self) -> Dict[str, List[Table]]:
         if self.table_list is None:
             self.table_list = {}
             for filename in self.get_table_list():
@@ -67,8 +72,12 @@ class TableList(object):
     def open(self, filename):
         return self.wrapper.open(filename=filename)
 
+
     @property
     def version(self):
         if self.version_info is None:
-            self.version_info = Version.objects.nearest_by_date(self.dump_date)
+            try:
+                self.version_info = Version.objects.nearest_by_date(self.dump_date)
+            except Version.DoesNotExist:
+                raise TableListLoadingError('Не загружен список версий')
         return self.version_info

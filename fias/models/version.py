@@ -1,7 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals, absolute_import
-from django.utils.encoding import python_2_unicode_compatible
-
 from django.db import models
 
 __all__ = ['Version', 'Status']
@@ -16,11 +12,10 @@ class VersionManager(models.Manager):
             return self.get_queryset().filter(dumpdate__lte=date).latest('dumpdate')
 
 
-@python_2_unicode_compatible
 class Version(models.Model):
-
     class Meta:
-        app_label = 'fias'
+        verbose_name = 'Версия базы ФИАС'
+        verbose_name_plural = 'Версии базы ФИАС'
 
     objects = VersionManager()
 
@@ -28,22 +23,19 @@ class Version(models.Model):
     date = models.DateField(db_index=True, blank=True, null=True)
     dumpdate = models.DateField(db_index=True)
 
-    complete_xml_url = models.CharField(max_length=255)
-    complete_dbf_url = models.CharField(max_length=255)
-    delta_xml_url = models.CharField(max_length=255, blank=True, null=True)
-    delta_dbf_url = models.CharField(max_length=255, blank=True, null=True)
+    complete_gar_url = models.CharField(max_length=255)
+    delta_gar_url = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return '{0} from {1}'.format(self.ver, self.dumpdate)
 
 
-@python_2_unicode_compatible
 class Status(models.Model):
-
     class Meta:
-        app_label = 'fias'
+        verbose_name = 'Статус таблицы'
+        verbose_name_plural = 'Статусы таблиц'
 
-    table = models.CharField(primary_key=True, max_length=15)
+    table = models.CharField(primary_key=True, max_length=25)
     ver = models.ForeignKey(Version, on_delete=models.CASCADE)
 
     def __str__(self):

@@ -7,33 +7,30 @@ from fias.models import AddrObj, FIASAddress, FIASAddressWithArea, FIASHouse
 
 
 class Item(models.Model):
-    
     title = models.CharField('title', max_length=100)
 
     location = AddressField()
 
 
 class ItemWithArea(models.Model):
-
     title = models.CharField('title', max_length=100)
 
     location = AddressField()
 
     area = ChainedAreaField(AddrObj, on_delete=models.CASCADE, address_field='location', related_name='+')
 
-
-#class CachedAddress(FIASAddress):
+# class CachedAddress(FIASAddress):
 #    pass
 
 
-#class CachedAddressWithArea(FIASAddressWithArea):
+# class CachedAddressWithArea(FIASAddressWithArea):
 #    pass
 
 
-#class CachedAddressWithHouse(FIASAddress, FIASHouse):
+# class CachedAddressWithHouse(FIASAddress, FIASHouse):
 #    pass
 
-#class NullableAddressItem(models.Model):
+# class NullableAddressItem(models.Model):
 #    title = models.CharField('title', max_length=100)
 #
 #    location = AddressField(blank=True, null=True)

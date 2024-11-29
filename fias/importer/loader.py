@@ -1,78 +1,21 @@
-# coding: utf-8
-from __future__ import unicode_literals, absolute_import
-
 import datetime
+import logging
+
 from django.conf import settings
 from django import db
 from django.db import IntegrityError
-from progress.helpers import WritelnMixin
 from sys import stderr
 
-from fias.importer.signals import (
-    pre_import_table, post_import_table
+from .signals import (
+    pre_import_table,
+    post_import_table
 )
-from fias.importer.validators import validators
+from .validators import validators
+
+logger = logging.getLogger(__name__)
 
 
-class LoadingBar(WritelnMixin):
-    file = stderr
-
-    text = 'T: %(table)s.' \
-           ' L: %(loaded)d | U: %(updated)d' \
-           ' | S: %(skipped)d[E:%(errors)d]' \
-           ' | R: %(depth)d[%(stack_str)s]' \
-           ' \tFN: %(filename)s'
-
-    loaded = 0
-    updated = 0
-    skipped = 0
-    errors = 0
-    depth = 0
-    stack = []
-    stack_str = 0
-    hide_cursor = False
-
-    def __init__(self, message=None, **kwargs):
-        self.table = kwargs.pop('table', 'unknown')
-        self.filename = kwargs.pop('filename', 'unknown')
-        super(LoadingBar, self).__init__(message=message, **kwargs)
-
-    def __getitem__(self, key):
-        if key.startswith('_'):
-            return None
-        return getattr(self, key, None)
-
-    def update(self, loaded=0, updated=0, skipped=0, errors=0, regress_depth=0, regress_len=0, regress_iteration=0):
-        if loaded:
-            self.loaded = loaded
-        if updated:
-            self.updated = updated
-        if skipped:
-            self.skipped = skipped
-        if errors:
-            self.errors = errors
-
-        self.depth = regress_depth
-        if not self.depth:
-            self.stack_str = 0
-        else:
-            regress_len = '{0}:{1}'.format(regress_iteration, regress_len)
-            stack_len = len(self.stack)
-            if stack_len == self.depth:
-                self.stack[self.depth-1] = regress_len
-            elif stack_len < self.depth:
-                self.stack.append(regress_len)
-            else:
-                self.stack = self.stack[0:self.depth]
-                self.stack[self.depth-1] = regress_len
-
-            self.stack_str = '/'.join(self.stack)
-
-        ln = self.text % self
-        self.writeln(ln)
-
-
-class TableLoader(object):
+class TableLoader:
 
     def __init__(self, limit=10000):
         self.limit = int(limit)
@@ -98,7 +41,7 @@ class TableLoader(object):
 
         for i in range(0, batch_count):
             batch = objects[i * batch_len:(i + 1) * batch_len]
-            bar.update(regress_depth=depth, regress_len=batch_len, regress_iteration=i + 1)
+            # bar.update(regress_depth=depth, regress_len=batch_len, regress_iteration=i + 1)
             try:
                 table.model.objects.bulk_create(batch)
             except (IntegrityError, ValueError) as e:
@@ -106,7 +49,7 @@ class TableLoader(object):
                     self.counter -= 1
                     self.skip_counter += 1
                     self.err_counter += 1
-                    bar.update(loaded=self.counter, skipped=self.skip_counter, errors=self.err_counter)
+                    # bar.update(loaded=self.counter, skipped=self.skip_counter, errors=self.err_counter)
                     continue
                 else:
                     self.regressive_create(table, batch, bar=bar, depth=depth + 1)
@@ -118,7 +61,7 @@ class TableLoader(object):
             self.regressive_create(table, objects, bar)
 
         #  Обнуляем индикатор регрессии
-        bar.update(regress_depth=0, regress_len=0)
+        # bar.update(regress_depth=0, regress_len=0)
         if settings.DEBUG:
             db.reset_queries()
 
@@ -128,8 +71,12 @@ class TableLoader(object):
         post_import_table.send(sender=self.__class__, table=table)
 
     def do_load(self, tablelist, table):
-        bar = LoadingBar(table=table.name, filename=table.filename)
-        bar.update()
+        bar = None
+        # bar = LoadingBar(table=table.name, filename=table.filename)
+        # bar.update()
+
+        # logger.debug(f'Loading: {tablelist}/{table}')
+        print(f'Loading: {tablelist}/{table}')
 
         objects = set()
         for item in table.rows(tablelist=tablelist):
@@ -137,7 +84,8 @@ class TableLoader(object):
                 self.skip_counter += 1
 
                 if self.skip_counter and self.skip_counter % self.limit == 0:
-                    bar.update(skipped=self.skip_counter)
+                    # bar.update(skipped=self.skip_counter)
+                    pass
                 continue
 
             objects.add(item)
@@ -146,13 +94,13 @@ class TableLoader(object):
             if self.counter and self.counter % self.limit == 0:
                 self.create(table, objects, bar=bar)
                 objects.clear()
-                bar.update(loaded=self.counter, skipped=self.skip_counter)
+                # bar.update(loaded=self.counter, skipped=self.skip_counter)
 
         if objects:
             self.create(table, objects, bar=bar)
 
-        bar.update(loaded=self.counter, skipped=self.skip_counter)
-        bar.finish()
+        # bar.update(loaded=self.counter, skipped=self.skip_counter)
+        # bar.finish()
 
 
 class TableUpdater(TableLoader):
@@ -162,7 +110,8 @@ class TableUpdater(TableLoader):
         super(TableUpdater, self).__init__(limit=limit)
 
     def do_load(self, tablelist, table):
-        bar = LoadingBar(table=table.name, filename=table.filename)
+        bar = None
+        # bar = LoadingBar(table=table.name, filename=table.filename)
 
         model = table.model
         objects = set()
@@ -184,13 +133,14 @@ class TableUpdater(TableLoader):
             if self.counter and self.counter % self.limit == 0:
                 self.create(table, objects, bar=bar)
                 objects.clear()
-                bar.update(loaded=self.counter)
+                # bar.update(loaded=self.counter)
 
             if self.upd_counter and self.upd_counter % self.upd_limit == 0:
-                bar.update(updated=self.upd_counter)
+                # bar.update(updated=self.upd_counter)
+                pass
 
         if objects:
             self.create(table, objects, bar=bar)
 
-        bar.update(loaded=self.counter, updated=self.upd_counter, skipped=self.skip_counter)
-        bar.finish()
+        # bar.update(loaded=self.counter, updated=self.upd_counter, skipped=self.skip_counter)
+        # bar.finish()

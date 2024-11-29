@@ -1,6 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals, absolute_import
-
 from django.db import connections, OperationalError
 from django.http import Http404, JsonResponse
 from django.utils.encoding import smart_text
@@ -50,10 +47,10 @@ class SphinxResponseView(AutoResponseView):
                 {
                     'text': obj['fullname'],
                     'id': obj['aoguid'],
-                    #'level': obj['aolevel']
+                    # 'level': obj['aolevel']
                 }
                 for obj in context['object_list']
-                ],
+            ],
             'more': context['page_obj'].has_next()
         })
 
@@ -87,7 +84,7 @@ class GetAreasListView(BaseListView):
                     'id': obj.pk,
                 }
                 for obj in context['object_list']
-                ],
+            ],
         })
 
     def get_queryset(self):

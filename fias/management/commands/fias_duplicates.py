@@ -1,10 +1,7 @@
-# coding: utf-8
-from __future__ import unicode_literals, absolute_import
-
 import sys
 
 from fias.config import TABLES
-from fias.importer.commands import get_tablelist
+from fias._importer.commands import get_tablelist
 
 from fias.compat import BaseCommandCompatible, DJANGO_VERSION
 

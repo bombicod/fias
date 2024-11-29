@@ -1,11 +1,8 @@
-# coding: utf-8
-from __future__ import unicode_literals, absolute_import
-
 import sys
 
 from fias.config import TABLES
 from fias.models import Status, Version
-from fias.importer.version import fetch_version_info
+from fias._importer.version import fetch_version_info
 
 from fias.compat import BaseCommandCompatible, DJANGO_VERSION
 

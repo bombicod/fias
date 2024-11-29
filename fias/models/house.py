@@ -1,60 +1,33 @@
-# coding: utf-8
-from __future__ import unicode_literals, absolute_import
-
 from django.db import models
 
 from fias.fields import UUIDField
-from fias.models.addrobj import AddrObj
-from fias.models.common import Common, June2016Update
-from fias.models.status import EstStat, IntvStat, StrStat
 
-__all__ = ['House', 'HouseInt']
+from .abstract_addrobj import AddrObjCommonMixin
+from .house_type import HouseType
+
+__all__ = ['House']
 
 
-class House(June2016Update):
+class House(AddrObjCommonMixin):
     """
     Сведения по номерам домов улиц городов и населенных пунктов
     """
+
     class Meta:
-        app_label = 'fias'
         verbose_name = 'Номер дома'
         verbose_name_plural = 'Номера домов'
 
-    aoguid = models.ForeignKey(AddrObj, verbose_name='Идентификатор записи родительского объекта',
-                               help_text='(улица, город, населенный пункт и т.п.)', on_delete=models.CASCADE)
-    houseguid = UUIDField('Глобальный уникальный идентификатор дома', primary_key=True)
-    houseid = UUIDField('Уникальный идентификатор записи дома', unique=True)
+    objectid = models.BigIntegerField('Глобальный уникальный идентификатор объекта')
+    objectguid = UUIDField('Глобальный уникальный идентификатор объекта')
 
-    housenum = models.CharField('Номер дома', max_length=20, blank=True, null=True)
-    eststatus = models.ForeignKey(EstStat, verbose_name='Признак владения', default=0, on_delete=models.CASCADE)
-    buildnum = models.CharField('Номер корпуса', max_length=10, blank=True, null=True)
-    strucnum = models.CharField('Номер строения', max_length=10, blank=True, null=True)
-    strstatus = models.ForeignKey(StrStat, verbose_name='Признак строения', default=0, on_delete=models.CASCADE)
+    changeid = models.BigIntegerField('ID изменившей транзакции')
 
-    statstatus = models.PositiveSmallIntegerField('Состояние дома')
+    housenum = models.CharField('Основной номер дома', max_length=50, blank=True)
+    addnum1 = models.CharField('Дополнительный номер дома 1', max_length=50, blank=True)
+    addnum2 = models.CharField('Дополнительный номер дома 2', max_length=50, blank=True)
 
-    regioncode = models.CharField('Код региона', max_length=2, blank=True, null=True)
-
-    counter = models.IntegerField('Счетчик записей домов для КЛАДР 4')
-
-
-class HouseInt(Common):
-    """
-    Интервалы домов
-    """
-    class Meta:
-        app_label = 'fias'
-        verbose_name = 'Интервал домов'
-        verbose_name_plural = 'Интервалы домов'
-
-    houseintid = UUIDField('Идентификатор записи интервала домов')
-    intguid = UUIDField('Глобальный уникальный идентификатор интервала домов', primary_key=True)
-    aoguid = models.ForeignKey(AddrObj, verbose_name='Идентификатор объекта родительского объекта',
-                               help_text='(улица, город, населенный пункт и т.п.)', on_delete=models.CASCADE)
-
-    intstart = models.PositiveIntegerField('Значение начала интервала')
-    intend = models.PositiveIntegerField('Значение окончания интервала')
-
-    intstatus = models.ForeignKey(IntvStat, verbose_name='Статус интервала', default=0, on_delete=models.CASCADE)
-
-    counter = models.PositiveIntegerField('Счетчик записей домов для КЛАДР 4')
+    housetype = models.ForeignKey(HouseType, on_delete=models.CASCADE, related_name='+',
+                                  db_column='housetype', blank=True, null=True,
+                                  verbose_name='Основной тип дома')
+    addtype1 = models.IntegerField('Дополнительный тип дома 1', blank=True, null=True)
+    addtype2 = models.IntegerField('Дополнительный тип дома 2', blank=True, null=True)

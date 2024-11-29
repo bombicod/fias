@@ -1,6 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals, absolute_import
-
 from unittest import TestCase
 from importlib import import_module
 import types

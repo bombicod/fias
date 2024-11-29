@@ -1,12 +1,11 @@
-# coding: utf-8
-from __future__ import unicode_literals, absolute_import
-
 from django.core.exceptions import ImproperlyConfigured
+
 try:
     from django.db.models import UUIDField
 except ImportError:
     try:
         from django_extensions.db.fields import UUIDField as UF
+
 
         class UUIDField(UF):
 
@@ -19,8 +18,10 @@ except ImportError:
                     return 'uuid'
                 return super(UUIDField, self).db_type(connection)
 
+
         # MonkeyPatch...
         from django.db import models
+
         models.UUIDField = UUIDField
 
     except ImportError:

@@ -1,6 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals, absolute_import
-
 import os
 
 DATA_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), 'data'))

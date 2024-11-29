@@ -1,8 +1,7 @@
-# coding: utf-8
-from __future__ import unicode_literals, absolute_import
-
 from .tablelist import TableList, TableListLoadingError
 from .wrapper import DirectoryWrapper
+
+__all__ = ['DirectoryTableList']
 
 
 class EmptyDirError(TableListLoadingError):

@@ -1,6 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals, absolute_import
-
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.db import connections
@@ -12,6 +9,7 @@ from ..config import SPHINX_ADDROBJ_INDEX, SEARCHD_CONNECTION
 import re
 
 connection = connections[DATABASE_ALIAS]
+
 
 def _get_database_engine():
     _engine = connection.vendor
@@ -35,6 +33,7 @@ def _get_sql_template(name):
 def _get_sphinx_template(name):
     return _get_template('config/{0}.conf'.format(name))
 
+
 try:
     _get_sql_template('query')
 except TemplateDoesNotExist:
@@ -43,7 +42,6 @@ except TemplateDoesNotExist:
 
 
 def render_sphinx_source():
-
     ctx = {
         'db_type': _get_database_engine(),
         'db_host': settings.DATABASES[DATABASE_ALIAS]['HOST'],
@@ -74,6 +72,7 @@ def render_sphinx_index(path):
 
     return _get_sphinx_template('index').render(ctx)
 
+
 def render_sphinx_searchd_config():
     ctx = {
         'sphinx_host': SEARCHD_CONNECTION['HOST'],
@@ -81,6 +80,7 @@ def render_sphinx_searchd_config():
     }
 
     return _get_sphinx_template('sphinx').render(ctx)
+
 
 def render_sphinx_config(path, full=True):
     source = render_sphinx_source()

@@ -1,49 +1,52 @@
-# coding: utf-8
-from __future__ import unicode_literals, absolute_import
+from django.db import connections, router, models
 
-from django.db import connections, router
+# from fias.config import TABLE_ROW_FILTERS
+from fias.models import *
 
-from fias.config import TABLE_ROW_FILTERS
-from fias.models import (
-    AddrObj,
-    House, HouseInt,
-    LandMark,
-    Room, FlatType, RoomType, Stead,
-    NormDoc, NDocType,
-    SocrBase,
+from typing import Iterator, Type
 
-    ActStat, CenterSt, CurentSt,
-    EstStat, HSTStat, IntvStat,
-    OperStat, StrStat,
-)
+tables_map = {
+    # Простые справочники
+    'addr_obj_types': AddrObjType,
+    'apartment_types': ApartmentType,
+    'house_types': HouseType,
+    'normative_docs_types': NDocType,
+    'operation_types': OperationType,
+    'param_types': ParamType,
 
-table_names = {
-    'addrobj': AddrObj,
-    'house': House,
-    'houseint': HouseInt,
-    'landmark': LandMark,
-    'normdoc': NormDoc,
-    'socrbase': SocrBase,
+    'addr_obj': AddrObj,
+    'addr_obj_division': AddrObjDivision,
+    'addr_obj_params': AddrObjParam,
 
-    'actstat': ActStat,
-    'centerst': CenterSt,
-    'curentst': CurentSt,
-    'eststat': EstStat,
-    'hststat': HSTStat,
-    'intvstat': IntvStat,
-    'ndoctype': NDocType,
-    'operstat': OperStat,
-    'strstat': StrStat,
-    'room': Room,
-    'stead': Stead,
-    'flattype': FlatType,
-    'roomtype': RoomType,
+    'adm_hierarchy': AdmHierarchy,
+    'apartments': Apartment,
+    'apartments_params': ApartmentParam,
+
+    'carplaces': CarPlace,
+    'carplaces_params': CarPlaceParam,
+
+    'change_history': ChangeHistory,
+
+    'houses': House,
+    'houses_params': HouseParam,
+
+    'mun_hierarchy': MunHierarchy,
+    'normative_docs': NormDoc,
+    'normative_docs_kinds': NDocKind,
+
+    'object_levels': ObjectLevel,
+
+    'reestr_objects': Object,
+    'room_types': RoomType,
+    'rooms': Room,
+    'rooms_params': RoomParam,
+
+    'steads': Stead,
+    'steads_params': SteadParam,
 }
 
 name_trans = {
-    'nordoc': 'normdoc',
-    'housint': 'houseint',
-    'addrob': 'addrobj',
+
 }
 
 
@@ -55,7 +58,7 @@ class ParentLookupException(Exception):
     pass
 
 
-class TableIterator(object):
+class TableIterator:
 
     def __init__(self, fd, model):
         self._fd = fd
@@ -83,11 +86,13 @@ class TableIterator(object):
             return None
 
         item = self.model(**row)
-        for filter_func in TABLE_ROW_FILTERS.get(self.model._meta.model_name, tuple()):
-            item = filter_func(item)
 
-            if item is None:
-                break
+        # Убираем пока фильтрацию строк
+        # for filter_func in TABLE_ROW_FILTERS.get(self.model._meta.model_name, tuple()):
+        #     item = filter_func(item)
+        #
+        #     if item is None:
+        #         break
 
         return item
 
@@ -98,21 +103,25 @@ class TableIterator(object):
 
 
 class Table(object):
-    name = None
-    deleted = False
-    iterator = TableIterator
+    name: str
+    deleted: bool = False
+    iterator_class: Type[TableIterator]
+
+    model: Type[models.Model]
 
     def __init__(self, filename, **kwargs):
+        assert hasattr(self, 'iterator_class'), 'iterator_class must be set!'
+
         self.filename = filename
 
         name = kwargs['name'].lower()
 
         self.name = name_trans.get(name, name)
-        self.model = table_names.get(self.name)
+        self.model = tables_map.get(self.name)
 
         self.deleted = bool(kwargs.get('deleted', False))
 
-    def _truncate(self, model):
+    def _truncate(self, model: Type[models.Model]):
         db_table = model._meta.db_table
         connection = connections[router.db_for_write(model)]
         cursor = connection.cursor()
@@ -130,5 +139,8 @@ class Table(object):
     def open(self, tablelist):
         return tablelist.open(self.filename)
 
-    def rows(self, tablelist):
+    def rows(self, tablelist) -> Iterator[models.Model]:
         raise NotImplementedError()
+
+    def __repr__(self):
+        return f'<{self.__class__.__name__}:{self.name} "{self.filename}">'

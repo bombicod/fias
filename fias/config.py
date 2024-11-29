@@ -1,6 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals, absolute_import
-
 import os
 
 from django.conf import settings
@@ -22,7 +19,6 @@ TABLES += tuple(x.lower() for x in TABLES_DEFAULT if x.lower() in list(set(getat
 
 DELETED_TABLES = ('normdoc', 'addrobj', 'house', 'room', 'stead', 'houseint')
 
-
 DATABASE_ALIAS = getattr(settings, 'FIAS_DATABASE_ALIAS', DEFAULT_DB_ALIAS)
 
 if DATABASE_ALIAS not in settings.DATABASES:
@@ -36,7 +32,6 @@ if not isinstance(user_weights, dict):
     raise ImproperlyConfigured('FIAS_SB_WEIGHTS should be a dict type')
 
 weights.update(user_weights)
-
 
 """
 см. fias.importer.filters

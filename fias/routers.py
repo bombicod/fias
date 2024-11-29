@@ -1,12 +1,9 @@
-# coding: utf-8
-from __future__ import unicode_literals, absolute_import
-
 from fias.config import DEFAULT_DB_ALIAS, DATABASE_ALIAS
 
 
 class FIASRouter(object):
     ALLOWED_REL = ['AddrObj']
-    
+
     def db_for_read(self, model, **hints):
         if model._meta.app_label == 'fias':
             return DATABASE_ALIAS

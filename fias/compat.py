@@ -1,14 +1,9 @@
-#coding: utf-8
-from __future__ import unicode_literals, absolute_import
-
 from optparse import make_option
 
 import django
 from django.core.management.base import BaseCommand
 
-
 DJANGO_VERSION = 'old' if django.VERSION < (1, 10) else 'new'
-
 
 try:
     from django.utils.importlib import import_module
@@ -20,6 +15,7 @@ try:
     from urllib.error import HTTPError
 except ImportError:
     from urllib import urlretrieve
+
     HTTPError = IOError
 
 try:

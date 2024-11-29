@@ -1,107 +1,64 @@
-# coding: utf-8
-from __future__ import unicode_literals, absolute_import
-
 import datetime
+import requests
 
-from django.core.exceptions import ImproperlyConfigured
-
-from fias.config import PROXY
-from fias.importer.signals import pre_fetch_version, post_fetch_version
 from fias.models import Version
 
-wsdl_source = "https://fias.nalog.ru/WebServices/Public/DownloadService.asmx?WSDL"
+from typing import Dict
+
+from .signals import pre_fetch_version, post_fetch_version
+
+all_source = 'https://fias.nalog.ru/WebServices/Public/GetAllDownloadFileInfo'
+last_source = 'https://fias.nalog.ru/WebServices/Public/GetLastDownloadFileInfo'
+
+__all__ = ['fetch_version_info', 'fetch_last_version_info']
 
 
-def parse_item_as_dict(item, update_all=False):
+def parse_version(item: Dict, update_all=False):
     """
-    Разбор данных о версии как словаря
+    Записывает строку информации об обновлении в БД
+    :param item:
+    :param update_all:
+    :return:
     """
+
     ver, created = Version.objects.get_or_create(
         ver=item['VersionId'],
-        dumpdate=datetime.datetime.strptime(item['TextVersion'][-10:], "%d.%m.%Y").date(),
+        dumpdate=datetime.datetime.strptime(item['Date'], '%d.%m.%Y').date(),
     )
 
     if created or update_all:
-        setattr(ver, 'complete_xml_url', item['FiasCompleteXmlUrl'])
-        setattr(ver, 'complete_dbf_url', item['FiasCompleteDbfUrl'])
-
-        if hasattr(item, 'FiasDeltaXmlUrl'):
-            setattr(ver, 'delta_xml_url', item['FiasDeltaXmlUrl'])
-        else:
-            setattr(ver, 'delta_xml_url', None)
-
-        if hasattr(item, 'FiasDeltaDbfUrl'):
-            setattr(ver, 'delta_dbf_url', item['FiasDeltaDbfUrl'])
-        else:
-            setattr(ver, 'delta_dbf_url', None)
+        setattr(ver, 'complete_gar_url', item['GarXMLFullURL'])
+        setattr(ver, 'delta_gar_url', item['GarXMLDeltaURL'])
 
         ver.save()
-
-
-def parse_item_as_object(item, update_all=False):
-    """
-    Разбор данных о версии, как объекта
-    """
-    ver, created = Version.objects.get_or_create(
-        ver=item.VersionId,
-        dumpdate=datetime.datetime.strptime(item.TextVersion[-10:], "%d.%m.%Y").date(),
-    )
-
-    if created or update_all:
-        setattr(ver, 'complete_xml_url', item.FiasCompleteXmlUrl)
-        setattr(ver, 'complete_dbf_url', item.FiasCompleteDbfUrl)
-
-        if hasattr(item, 'FiasDeltaXmlUrl'):
-            setattr(ver, 'delta_xml_url', item.FiasDeltaXmlUrl)
-        else:
-            setattr(ver, 'delta_xml_url', None)
-
-        if hasattr(item, 'FiasDeltaDbfUrl'):
-            setattr(ver, 'delta_dbf_url', item.FiasDeltaDbfUrl)
-        else:
-            setattr(ver, 'delta_dbf_url', None)
-
-        ver.save()
-
-
-def iter_version_info(result):
-    if hasattr(result, 'DownloadFileInfo'):
-        for item in result.DownloadFileInfo:
-            yield item
-    else:
-        for item in result:
-            yield item
-
-
-try:
-    from zeep.client import Client
-    from zeep import __version__ as zver
-    z_major, z_minor, z_sub = list(map(int, zver.split('.')))
-
-    if z_minor < 20:
-        parse_func = parse_item_as_object
-    elif z_minor > 20:
-        parse_func = parse_item_as_dict
-
-    client = Client(wsdl=wsdl_source)
-except ImportError:
-    try:
-        from suds.client import Client
-
-        parse_func = parse_item_as_dict
-        client = Client(url=wsdl_source, proxy=PROXY or None)
-
-    except ImportError:
-        raise ImproperlyConfigured('Не найдено подходящей библиотеки для работы с WSDL.'
-                                   ' Пожалуйста установите zeep или suds!')
 
 
 def fetch_version_info(update_all=False):
+    """
+    Получает сведения обо всех доступных обновлениях БД
+    :param update_all:
+    :return:
+    """
 
     pre_fetch_version.send(object.__class__)
 
-    result = client.service.GetAllDownloadFileInfo()
-    for item in iter_version_info(result=result):
-        parse_func(item=item, update_all=update_all)
+    result = requests.get(all_source)
+    if result.status_code == 200:
+        for item in result.json():
+            parse_version(item, update_all)
+
+    post_fetch_version.send(object.__class__)
+
+
+def fetch_last_version_info():
+    """
+    Получает сведения о последнем доступном обновлении БД
+    :return:
+    """
+    pre_fetch_version.send(object.__class__)
+
+    result = requests.get(last_source)
+    if result.status_code == 200:
+        parse_version(result.json(), update_all=True)
 
     post_fetch_version.send(object.__class__)

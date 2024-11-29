@@ -1,6 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals, absolute_import
-
 from django.core.exceptions import ImproperlyConfigured
 
 from fias.compat import import_module

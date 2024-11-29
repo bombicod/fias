@@ -1,6 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals, absolute_import
-
 import datetime
 import os
 import pytest
@@ -10,12 +7,13 @@ import tempfile
 
 from django.test import TestCase
 
-from fias.importer.source.wrapper import (
+from fias._importer.source.wrapper import (
     SourceWrapper,
     DirectoryWrapper,
     RarArchiveWrapper,
 )
 from .info import FAKE_DIR_PATH, FAKE_ARCHIVE_PATH, FAKE_FILES
+
 
 class TestSourceWrapper(TestCase):
 
@@ -33,7 +31,6 @@ class TestSourceWrapper(TestCase):
 
 
 class TestDirectoryWrapper(TestCase):
-
 
     def setUp(self):
         self.wrapper = DirectoryWrapper(FAKE_DIR_PATH)
@@ -80,4 +77,3 @@ class TestArchiveWrapper(TestDirectoryWrapper):
 
     def setUp(self):
         self.wrapper = RarArchiveWrapper(rarfile.RarFile(FAKE_ARCHIVE_PATH))
-

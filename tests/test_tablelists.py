@@ -1,12 +1,9 @@
-# coding: utf-8
-from __future__ import unicode_literals, absolute_import
-
 import datetime
 import os
 from django.test import TestCase
 
-from fias.importer.source.tablelist import TableList
-from fias.importer.source import *
+from fias._importer.source.tablelist import TableList
+from fias._importer.source import *
 from fias.models import Version
 
 from .info import FAKE_FILES
@@ -38,7 +35,7 @@ class TestTableList(TestCase):
     def test_get_date_info(self):
         tl = TableList(src=None)
         for f in FAKE_FILES:
-            self.assertEqual(datetime.date(2000, 1, int(f[-1])+1), tl.get_date_info(f))
+            self.assertEqual(datetime.date(2000, 1, int(f[-1]) + 1), tl.get_date_info(f))
 
     def test_open(self):
         tl = TableList(src=None)

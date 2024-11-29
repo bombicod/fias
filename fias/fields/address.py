@@ -1,8 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals, absolute_import
-
-import six
-
 from django.core.exceptions import ValidationError
 from django.db import router
 from django.db import models
@@ -21,7 +16,7 @@ class AddressField(ForeignKey):
 
     def formfield(self, **kwargs):
         db = kwargs.pop('using', None)
-        if isinstance(self.remote_field.model, six.string_types):
+        if isinstance(self.remote_field.model, str):
             raise ValueError("Cannot create form field for %r yet, because "
                              "its related model %r has not been loaded yet" %
                              (self.name, self.remote_field.model))
@@ -58,9 +53,9 @@ class AddressField(ForeignKey):
 
 class ChainedAreaField(ForeignKey):
 
-    def __init__(self, to, on_delete,  address_field=None, **kwargs):
+    def __init__(self, to, on_delete, address_field=None, **kwargs):
 
-        if isinstance(to, six.string_types):
+        if isinstance(to, str):
             self.app_name, self.model_name = to.split('.')
         else:
             self.app_name = to._meta.app_label
@@ -73,15 +68,14 @@ class ChainedAreaField(ForeignKey):
 
         ForeignKey.__init__(self, to, on_delete, **kwargs)
 
-    def formfield(self, **kwargs):
-        db = kwargs.pop('using', None)
+    def formfield(self, using=None, **kwargs):
         if isinstance(self.remote_field.model, six.string_types):
             raise ValueError("Cannot create form field for %r yet, because "
                              "its related model %r has not been loaded yet" %
                              (self.name, self.remote_field.model))
         defaults = {
             'form_class': forms.ChainedAreaField,
-            'queryset': self.remote_field.model._default_manager.using(db).none(),
+            'queryset': self.remote_field.model._default_manager.using(using).none(),
             'to_field_name': self.remote_field.field_name,
             'app_name': self.app_name,
             'model_name': self.model_name,

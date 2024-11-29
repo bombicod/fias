@@ -1,6 +1,3 @@
-# coding: utf-8
-from __future__ import unicode_literals, absolute_import
-
 from django.db import models
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
@@ -14,7 +11,6 @@ __all__ = ['FIASAddress', 'FIASAddressWithArea',
 
 
 class FIASAddress(models.Model):
-
     class Meta:
         abstract = True
 
@@ -60,7 +56,6 @@ class FIASAddress(models.Model):
 
 
 class FIASAddressWithArea(FIASAddress):
-
     class Meta:
         abstract = True
 
@@ -68,7 +63,6 @@ class FIASAddressWithArea(FIASAddress):
 
 
 class FIASHouse(models.Model):
-
     class Meta:
         abstract = True
 
@@ -102,12 +96,10 @@ class GetAddressMixin(object):
 
 
 class FIASFullAddress(FIASAddress, FIASHouse, GetAddressMixin):
-
     class Meta:
         abstract = True
 
 
 class FIASFullAddressWithArea(FIASAddressWithArea, FIASHouse, GetAddressMixin):
-
     class Meta:
         abstract = True
