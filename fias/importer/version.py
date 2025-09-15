@@ -83,7 +83,7 @@ try:
     elif z_minor > 20:
         parse_func = parse_item_as_dict
 
-    client = Client(wsdl=wsdl_source)
+    # client = Client(wsdl=wsdl_source)
 except ImportError:
     try:
         from suds.client import Client
